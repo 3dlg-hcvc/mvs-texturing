@@ -18,6 +18,11 @@
 #define SKIP_HOLE_FILLING "skip_hole_filling"
 #define KEEP_UNSEEN_FACES "keep_unseen_faces"
 #define NUM_THREADS "num_threads"
+#define MAX_TEXTURE_SIZE "max_texture_size"
+#define PREFER_TEXTURE_SIZE "prefer_texture_size"
+#define MIN_TEXTURE_SIZE "min_texture_size"
+#define PADDING "padding"
+#define WASTE_RATIO "waste_ratio"
 
 Arguments parse_args(int argc, char **argv) {
     util::Arguments args;
@@ -87,6 +92,16 @@ Arguments parse_args(int argc, char **argv) {
         "Write out timings for each algorithm step (OUT_PREFIX + _timings.csv)");
     args.add_option('\0', NO_INTERMEDIATE_RESULTS, false,
         "Do not write out intermediate results");
+    args.add_option('\0',"max_texture_size", true,
+        "Max texture size, e.g 8192 (8x1024)");
+    args.add_option('\0',"prefer_texture_size", true,
+        "Prefer texture size, e.g 4096 (4x1024)");
+    args.add_option('\0',"min_texture_size", true,
+        "Min texture size, e.g 256");
+    args.add_option('\0',"padding", true,
+        "Padding allows for mip mapping levels to be generated without blending the texture patches together, default 7 (max_texture_size >> 7)");
+    args.add_option('\0',"waste_ratio", true,
+        "Control the size of waste pixels with padding, default 1.0");
     args.add_option('\0', NUM_THREADS, true,
         "How many threads to use. Set 1 for determinism.");
     args.parse(argc, argv);
@@ -148,6 +163,16 @@ Arguments parse_args(int argc, char **argv) {
                 conf.write_intermediate_results = false;
             } else if (i->opt->lopt == NUM_THREADS) {
                 conf.num_threads = std::stoi(i->arg);
+            } else if (i->opt->lopt == MAX_TEXTURE_SIZE) {
+                conf.settings.max_texture_size = std::stoi(i->arg);
+            } else if (i->opt->lopt == PREFER_TEXTURE_SIZE) {
+                conf.settings.prefer_texture_size = std::stoi(i->arg);
+            } else if (i->opt->lopt == MIN_TEXTURE_SIZE) {
+                conf.settings.min_texture_size = std::stoi(i->arg);
+            } else if (i->opt->lopt == PADDING) {
+                conf.settings.padding = std::stoi(i->arg);
+            } else if (i->opt->lopt == WASTE_RATIO) {
+                conf.settings.waste_ratio = std::stof(i->arg);
             } else {
                 throw std::invalid_argument("Invalid long option");
             }
@@ -178,7 +203,12 @@ Arguments::to_string(){
         << "Outlier removal method: \t" << choice_string<tex::OutlierRemoval>(settings.outlier_removal) << std::endl
         << "Tone mapping: \t" << choice_string<tex::ToneMapping>(settings.tone_mapping) << std::endl
         << "Apply global seam leveling: \t" << bool_to_string(settings.global_seam_leveling) << std::endl
-        << "Apply local seam leveling: \t" << bool_to_string(settings.local_seam_leveling) << std::endl;
+        << "Apply local seam leveling: \t" << bool_to_string(settings.local_seam_leveling) << std::endl
+        << "Max texture size: \t" << std::to_string(settings.max_texture_size) << std::endl
+        << "Prefer texture size: \t" << std::to_string(settings.prefer_texture_size) << std::endl
+        << "Min texture size: \t" << std::to_string(settings.min_texture_size) << std::endl
+        << "Padding level: \t" << std::to_string(settings.padding) << std::endl
+        << "Waste ratio: \t" << std::to_string(settings.waste_ratio) << std::endl;
 
     return out.str();
 }

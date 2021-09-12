@@ -92,6 +92,13 @@ struct Settings {
     bool local_seam_leveling = true;
     bool hole_filling = true;
     bool keep_unseen_faces = false;
+
+    // heuristic of texture size
+    int max_texture_size = 8 * 1024;
+    int prefer_texture_size = 4 * 1024;
+    int min_texture_size = 256;
+    int padding = 7;
+    float waste_ratio = 1.0;
 };
 
 TEX_NAMESPACE_END
